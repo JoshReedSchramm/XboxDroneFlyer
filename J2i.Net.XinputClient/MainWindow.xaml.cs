@@ -149,11 +149,15 @@ namespace J2i.Net.XinputClient
 
         private void HandleStickMovement()
         {
-            float ScaleFactor = 0.5f;
-            _yaw = (float)SelectedController.RightThumbStick.X / MAX_VALUE * ScaleFactor;
-            _gaz = (float)SelectedController.RightThumbStick.Y / MAX_VALUE * ScaleFactor;
-            _roll = (float)SelectedController.LeftThumbStick.X / MAX_VALUE * ScaleFactor;
-            _pitch = (float)SelectedController.LeftThumbStick.Y / MAX_VALUE * ScaleFactor;
+            float yawScaleFactor = 0.75F;
+            float gazScaleFactor = 0.75F;
+            float rollScaleFactor = 0.5F;
+            float pitchScaleFactor = -0.5F;
+            
+            _yaw = (float)SelectedController.RightThumbStick.X / MAX_VALUE * yawScaleFactor;
+            _gaz = (float)SelectedController.RightThumbStick.Y / MAX_VALUE * gazScaleFactor;
+            _roll = (float)SelectedController.LeftThumbStick.X / MAX_VALUE * rollScaleFactor;
+            _pitch = (float)SelectedController.LeftThumbStick.Y / MAX_VALUE * pitchScaleFactor;
         }
 
         private void DoMovement()
