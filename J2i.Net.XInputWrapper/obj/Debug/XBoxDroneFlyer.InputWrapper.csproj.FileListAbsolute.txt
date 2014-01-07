@@ -1,0 +1,4 @@
+C:\Projects\XBoxDroneFlyer\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.dll
+C:\Projects\XBoxDroneFlyer\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.pdb
+C:\Projects\XBoxDroneFlyer\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.dll
+C:\Projects\XBoxDroneFlyer\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.pdb

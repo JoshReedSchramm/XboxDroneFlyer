@@ -1,4 +1,5 @@
 ﻿using AR.Drone.Client;
+using AR.Drone.Client.Command;
 using AR.Drone.Data;
 using AR.Drone.Data.Navigation;
 using AR.Drone.Media;
@@ -27,6 +28,7 @@ namespace J2i.Net.XinputClient
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        const float MAX_VALUE = 32768.0f;
 
         private static NavigationData _navigationData;
         private static NavigationPacket _navigationPacket;
@@ -110,10 +112,12 @@ namespace J2i.Net.XinputClient
                 {
                     _droneClient.Takeoff();
                     _droneClient.Hover();
+                    Console.WriteLine("Taking Off");
                 }
                 else
                 {
                     _droneClient.Land();
+                    Console.WriteLine("Landing");
                 }
             }
 
@@ -122,6 +126,7 @@ namespace J2i.Net.XinputClient
                 if (_navigationData.State.HasFlag(NavigationState.Flying)) 
                 {
                     _droneClient.Emergency();
+                    Console.WriteLine("Emergency!");
                 }
             }
 
@@ -143,30 +148,45 @@ namespace J2i.Net.XinputClient
             }
         }
 
-        private bool HandleLeftStickMovement()
+        private bool HandleRightStickMovement()
         {
-            bool isDeadZone = ((float)Math.Abs(SelectedController.LeftThumbStick.X) / (float)Int16.MaxValue) < .1 &&
-                ((float)Math.Abs(SelectedController.LeftThumbStick.Y) / (float)Int16.MaxValue) < .1;
-
-            if (isDeadZone)
+            float yaw = (float)SelectedController.RightThumbStick.X / MAX_VALUE;
+            float gaz = (float)SelectedController.RightThumbStick.Y / MAX_VALUE;
+             
+            if ((Math.Abs(yaw) < .1) && (Math.Abs(gaz) < .1))
             {
                 Console.WriteLine("Left is Dead");
                 return false;
             }
+            else
+            {
+                Console.WriteLine("Yaw: {0} = {1}, Gaz: {1} = {2}", SelectedController.RightThumbStick.Y, yaw, SelectedController.RightThumbStick.Y, gaz);
+                _droneClient.Progress(FlightMode.AbsoluteControl, yaw: yaw);
+                _droneClient.Progress(FlightMode.AbsoluteControl, gaz: gaz);
+                
+                return true;
+            }
             return true;
         }
 
-        private bool HandleRightStickMovement()
+        private bool HandleLeftStickMovement()
         {
-            bool isDeadZone = ((float)Math.Abs(SelectedController.RightThumbStick.X) / (float)Int16.MaxValue) < .1 &&
-                ((float)Math.Abs(SelectedController.RightThumbStick.Y) / (float)Int16.MaxValue) < .1;
-
-            if (isDeadZone)
+            float roll = (float)SelectedController.LeftThumbStick.X / MAX_VALUE;
+            float pitch = (float)SelectedController.LeftThumbStick.Y / MAX_VALUE;
+                
+            if ((Math.Abs(roll) < .1) && (Math.Abs(pitch) < .1))
             {
                 Console.WriteLine("Right is Dead");
                 return false;
             }
-            return true;
+            else
+            {
+                Console.WriteLine("Roll: {0} = {1}, Pitch: {2} = {3}", SelectedController.LeftThumbStick.X, roll, SelectedController.LeftThumbStick.Y, pitch);
+                _droneClient.Progress(FlightMode.AbsoluteControl, roll: roll);
+                _droneClient.Progress(FlightMode.AbsoluteControl, pitch: pitch);
+                
+                return true;
+            }
         }
 
 
