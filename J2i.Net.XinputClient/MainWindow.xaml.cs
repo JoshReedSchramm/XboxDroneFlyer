@@ -101,8 +101,8 @@ namespace J2i.Net.XinputClient
 
         private void ProcessDroneCommands()
         {
-            if (_navigationData == null)
-                return;
+            //if (_navigationData == null)
+            //    return;
 
             if (SelectedController.IsAPressed) 
             {
@@ -125,10 +125,10 @@ namespace J2i.Net.XinputClient
                 }
             }
 
-            bool isDead = HandleLeftStickMovement();
-            isDead == isDead && HandleRightStickMovement();
+            bool leftStickMoved = HandleLeftStickMovement();
+            bool rightStickMoved = HandleRightStickMovement();
 
-            if (isDead)
+            if (!leftStickMoved && !rightStickMoved)
             {
                 Console.WriteLine("Drone is Hovering");
                 _droneClient.Hover();
@@ -145,26 +145,28 @@ namespace J2i.Net.XinputClient
 
         private bool HandleLeftStickMovement()
         {
-            bool isDeadZone = Math.Abs((SelectedController.LeftThumbStick.X / Int32.MaxValue)) < .1 &&
-                Math.Abs((SelectedController.LeftThumbStick.Y / Int32.MaxValue)) < .1;
+            bool isDeadZone = ((float)Math.Abs(SelectedController.LeftThumbStick.X) / (float)Int16.MaxValue) < .1 &&
+                ((float)Math.Abs(SelectedController.LeftThumbStick.Y) / (float)Int16.MaxValue) < .1;
 
             if (isDeadZone)
             {
                 Console.WriteLine("Left is Dead");
                 return false;
             }
+            return true;
         }
 
         private bool HandleRightStickMovement()
         {
-            bool isDeadZone = Math.Abs((SelectedController.RightThumbStick.X / Int32.MaxValue)) < .1 &&
-                Math.Abs((SelectedController.RightThumbStick.Y / Int32.MaxValue)) < .1;
+            bool isDeadZone = ((float)Math.Abs(SelectedController.RightThumbStick.X) / (float)Int16.MaxValue) < .1 &&
+                ((float)Math.Abs(SelectedController.RightThumbStick.Y) / (float)Int16.MaxValue) < .1;
 
             if (isDeadZone)
             {
                 Console.WriteLine("Right is Dead");
                 return false;
             }
+            return true;
         }
 
 
