@@ -1,0 +1,4 @@
+C:\Projects\AR.Drone\AR.Drone.Infrastructure\bin\Debug\AR.Drone.Infrastructure.dll
+C:\Projects\AR.Drone\AR.Drone.Infrastructure\bin\Debug\AR.Drone.Infrastructure.pdb
+C:\Projects\AR.Drone\AR.Drone.Infrastructure\obj\Debug\AR.Drone.Infrastructure.dll
+C:\Projects\AR.Drone\AR.Drone.Infrastructure\obj\Debug\AR.Drone.Infrastructure.pdb

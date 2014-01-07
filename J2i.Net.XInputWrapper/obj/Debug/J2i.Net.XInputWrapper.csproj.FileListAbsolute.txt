@@ -1,0 +1,10 @@
+c:\users\joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.csprojResolveAssemblyReference.cache
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.dll
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.pdb
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.dll
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.pdb
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.dll
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\bin\Debug\J2i.Net.XInputWrapper.pdb
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.csprojResolveAssemblyReference.cache
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.dll
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XInputWrapper\obj\Debug\J2i.Net.XInputWrapper.pdb

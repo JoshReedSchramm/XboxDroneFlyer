@@ -1,0 +1,11 @@
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Avionics.dll
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Avionics.pdb
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Client.dll
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Data.dll
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Infrastructure.dll
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Client.pdb
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Data.pdb
+C:\Projects\AR.Drone\AR.Drone.Avionics\bin\Debug\AR.Drone.Infrastructure.pdb
+C:\Projects\AR.Drone\AR.Drone.Avionics\obj\Debug\AR.Drone.Avionics.csprojResolveAssemblyReference.cache
+C:\Projects\AR.Drone\AR.Drone.Avionics\obj\Debug\AR.Drone.Avionics.dll
+C:\Projects\AR.Drone\AR.Drone.Avionics\obj\Debug\AR.Drone.Avionics.pdb

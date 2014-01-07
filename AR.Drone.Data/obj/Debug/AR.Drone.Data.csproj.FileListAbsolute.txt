@@ -1,0 +1,4 @@
+C:\Projects\AR.Drone\AR.Drone.Data\bin\Debug\AR.Drone.Data.dll
+C:\Projects\AR.Drone\AR.Drone.Data\bin\Debug\AR.Drone.Data.pdb
+C:\Projects\AR.Drone\AR.Drone.Data\obj\Debug\AR.Drone.Data.dll
+C:\Projects\AR.Drone\AR.Drone.Data\obj\Debug\AR.Drone.Data.pdb

@@ -1,0 +1,32 @@
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.exe.config
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.exe
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.pdb
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XInputWrapper.dll
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XInputWrapper.pdb
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.csprojResolveAssemblyReference.cache
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\MainWindow.baml
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\MainWindow.g.cs
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\App.g.cs
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient_MarkupCompile.cache
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.g.resources
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.Properties.Resources.resources
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.csproj.GenerateResource.Cache
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.exe
+C:\Users\Joel\documents\visual studio 2012\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.pdb
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.exe.config
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.exe
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XinputClient.pdb
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XInputWrapper.dll
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\bin\Debug\J2i.Net.XInputWrapper.pdb
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.csprojResolveAssemblyReference.cache
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\MainWindow.g.cs
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\App.g.cs
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient_MarkupCompile.cache
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient_MarkupCompile.lref
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\MainWindow.baml
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.g.resources
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.Properties.Resources.resources
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.csproj.GenerateResource.Cache
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.exe
+C:\Projects\J2i.Net.XInputWrapper\J2i.Net.XinputClient\obj\Debug\J2i.Net.XinputClient.pdb

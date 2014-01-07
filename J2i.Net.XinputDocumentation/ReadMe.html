@@ -1,0 +1,529 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Using XInput to access an Xbox 360 Controller in Managed Code</title>
+    	<link type="text/css" rel="stylesheet" href="http://s.codeproject.com/App_Themes/Std/Css/Main.min.css?dt=2.6.121031.1" />
+</head>
+<body>
+    <img src="ScreenShot.png" />
+    <h2>
+        Introduction
+    </h2>
+
+    <p>
+        A few years ago I wrote on using <a href="http://www.codeproject.com/Articles/16983/Using-XNA-to-Access-an-Xbox-360-Joystick">XNA to access the Xbox 360 controller</a> from a Windows Form application. I had received
+        a question about accessing the controller in an environment in which the XNA assemblies wouldn't be appropriate. So I 
+        wrote this code as an example of accessing the controller without the XNA assemblies. This is still a managed program. 
+        But it makes use of P/Invoke to use the functionality provided in the DirectX library.
+    </p>
+    <h2>Prerequisites</h2>
+    <p>
+        I wrote this code using Visual Studio 2012. It makes use of the <code>XInput</code> dll which is already part of Windows. So no additional 
+        installations are needed to use the code. 
+    </p>
+    <h2>What is XInput</h2>
+    <p>
+
+        DirectX is composed of many libraries. There's Direct3D for for rendering 3D graphics, DirectSound for playing sound, and so on. DirectInput
+        contains functionality for accessing various input devices (joysticks, keyboards, and more). But the Xbox 360 controller is not accessed
+        through that library. It is accessed through a different library named <code>XInput</code>. This library is dedicated to the the Xbox 360 controller.
+        Let's take a look at what is in the C language header file to see what functionality it provides. On my computer I can find the header
+        in <code>C:\Program Files (x86)\Windows Kits\8.0\Include\um\Xinput.h</code>.
+    </p>
+
+    <p>The header starts with defining the name of the DLL in which we will find the functionality.</p>
+    <pre lang="cpp">#if(_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+#define XINPUT_DLL_A  "xinput1_4.dll"
+#define XINPUT_DLL_W L"xinput1_4.dll"
+#else 
+#define XINPUT_DLL_A  "xinput9_1_0.dll"
+#define XINPUT_DLL_W L"xinput9_1_0.dll"
+#endif</pre>
+
+    <p>When a program is being compiled for an OS version before Windows 8 the functionality in the <code>xinput1_4.dll</code>. For programs 
+        compiled for Widnows 8 the functionality from <code>xinput9_1_0.dll</code> will be used. If you wanted to target both platforms you could
+        make use of the older DLL (<code>xinput9_1_0.dll</code>). It will work on Windows 8 too. But the newer DLL (<code>xinput1_4.dll</code>)
+        contains functionality for accessing the battery . 
+    </p>
+
+    <pre lang="cpp">//
+// Structures used by XInput APIs
+//
+typedef struct _XINPUT_GAMEPAD
+{
+    WORD                                wButtons;
+    BYTE                                bLeftTrigger;
+    BYTE                                bRightTrigger;
+    SHORT                               sThumbLX;
+    SHORT                               sThumbLY;
+    SHORT                               sThumbRX;
+    SHORT                               sThumbRY;
+} XINPUT_GAMEPAD, *PXINPUT_GAMEPAD;
+
+typedef struct _XINPUT_STATE
+{
+    DWORD                               dwPacketNumber;
+    XINPUT_GAMEPAD                      Gamepad;
+} XINPUT_STATE, *PXINPUT_STATE;
+
+typedef struct _XINPUT_VIBRATION
+{
+    WORD                                wLeftMotorSpeed;
+    WORD                                wRightMotorSpeed;
+} XINPUT_VIBRATION, *PXINPUT_VIBRATION;
+
+typedef struct _XINPUT_CAPABILITIES
+{
+    BYTE                                Type;
+    BYTE                                SubType;
+    WORD                                Flags;
+    XINPUT_GAMEPAD                      Gamepad;
+    XINPUT_VIBRATION                    Vibration;
+} XINPUT_CAPABILITIES, *PXINPUT_CAPABILITIES;
+</pre>
+    
+    <p>There's also a section that contains the newer structures for functionality that became available with Windows 8.</p>
+ <pre lang="cpp"><strong>#if(_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+</strong>
+typedef struct _XINPUT_BATTERY_INFORMATION
+{
+    BYTE BatteryType;
+    BYTE BatteryLevel;
+} XINPUT_BATTERY_INFORMATION, *PXINPUT_BATTERY_INFORMATION;
+
+typedef struct _XINPUT_KEYSTROKE
+{
+    WORD    VirtualKey;
+    WCHAR   Unicode;
+    WORD    Flags;
+    BYTE    UserIndex;
+    BYTE    HidCode;
+} XINPUT_KEYSTROKE, *PXINPUT_KEYSTROKE;
+
+<strong>#endif //(_WIN32_WINNT >= _WIN32_WINNT_WIN8)</strong>
+    </pre>
+
+    <p>Let's take a look at the structures redefined for .Net and C#. </p>
+    <h3>struct XInputGamePad</h3>
+    <p>The gamepad has two types of data to expose; information from the analog inputs and that from the digital inputs. The digital inputs include the 
+        A,B,X,Y, LB, and RB buttons.&nbsp; It also includes the Start, Back, the four directions on the D-pad, and the buttonsunder the thumb sticks. The 
+        analog inputs include the two triggers and the two thumb sticks.&nbsp; For the analog inputs there is a field for each input. The left and right 
+        triggers both an integer value between 0 and 255 in a byte. The thumb sticks return their X and Y values as 16-bit integers between the range of 
+        -32,768 and 32,767. The digital inputs are all returned in a single dield named <code>wButtons</code>.</p>
+
+
+
+    <pre lang="cs">[StructLayout(LayoutKind.Explicit)]
+public struct  XInputGamepad
+{
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(0)]
+    public short wButtons;
+
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(2)]
+    public byte bLeftTrigger;
+
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(3)]
+    public byte bRightTrigger;
+
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(4)]
+    public short sThumbLX;
+
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(6)]
+    public short sThumbLY;
+
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(8)]
+    public short sThumbRX;
+
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(10)]
+    public short sThumbRY;
+
+
+    public bool IsButtonPressed(int buttonFlags)
+    {
+        return (wButtons & buttonFlags) == buttonFlags;
+    }
+
+    public bool IsButtonPresent(int buttonFlags)
+    {
+        return (wButtons & buttonFlags) == buttonFlags;
+    }
+
+
+
+    public void Copy(XInputGamepad source)
+    {
+        sThumbLX = source.sThumbLX;
+        sThumbLY = source.sThumbLY;
+        sThumbRX = source.sThumbRX;
+        sThumbRY = source.sThumbRY;
+        bLeftTrigger = source.bLeftTrigger;
+        bRightTrigger = source.bRightTrigger;
+        wButtons = source.wButtons;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (!(obj is XInputGamepad))
+            return false;
+        XInputGamepad source = (XInputGamepad)obj;
+        return ((sThumbLX == source.sThumbLX) 
+        && (sThumbLY == source.sThumbLY)
+        && (sThumbRX == source.sThumbRX)
+        && (sThumbRY == source.sThumbRY)
+        && (bLeftTrigger == source.bLeftTrigger)
+        && (bRightTrigger == source.bRightTrigger)
+        && (wButtons == source.wButtons)); 
+    }
+}
+</pre>
+
+    <p>The method <code>IsButtonPressed</code> accepts a constant that identifies the button of interest and will look in the <code>wButtons</code> member to see if the button is pressed and return <code>true</code> or <code>false</code> accordingly. I&#39;ve added a few methods to make the the structure easier to use. The methods <code>IsButtonPressed</code> and <code>IsButtonPresent</code> have
+        the exact same implementation. 
+        The same structure is used for querying the state of the controller and the capabilities of the controller.&nbsp; I&#39;ve added the two methods as a notational difference. 
+    </p>
+
+    <h3>XInputVibration</h3>
+    <p>The <code>XInputVibration</code> structure contains two unsigned integers between 0 and 65,535. The higher the value placed in the structure the faster the associated motor will be 
+    when it is turned on.</p> 
+
+    <pre lang="cs">    [StructLayout(LayoutKind.Sequential)]
+public struct  XInputVibration
+{
+    [MarshalAs(UnmanagedType.I2)]
+    public ushort LeftMotorSpeed;
+
+    [MarshalAs(UnmanagedType.I2)]
+    public ushort RightMotorSpeed;
+}</pre>
+
+    <h3>XInputState</h3>
+    <p>The <code>XInputState</code> structure is an extension of the <code>XInputGamepad</code> structure with an additional field, <code>PacketNumber</code>. When the state of the
+        controller is queried several times this value will continue to be the same if the the state of the controller is the same from the last time it was queried. If the state of
+        the controller has changed then this value will be different. 
+    </p>
+
+    <pre lang="cs">[StructLayout(LayoutKind.Explicit)]
+public struct  XInputState
+{
+        [FieldOffset(0)]
+    public int PacketNumber;
+
+        [FieldOffset(4)]
+    public XInputGamepad Gamepad;
+
+        public void Copy(XInputState source)
+        {
+            PacketNumber = source.PacketNumber;
+            Gamepad.Copy(source.Gamepad);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || (!(obj is XInputState)))
+                return false;
+            XInputState source = (XInputState)obj;
+
+            return ((PacketNumber == source.PacketNumber)
+                && (Gamepad.Equals(source.Gamepad)));
+        }
+}</pre>
+
+    
+    <h3>XInputCapabilities</h3>
+    <p>The <code>XInputCapabilities</code> structure returns the capabilities of the controller. Not all Xbox controlls have all of the available buttons on them, such as the dance pads which generally only contains.&nbsp; Ironically the 
+        the <code>Type</code> field will always be populated with the same value (this may change in the future) and can be ignored for now. The field of interest is the 
+        <code>SubType</code> field. You can tell whether the controller is a gamepad, arcade stick, steeringwheel, or other type of controller. You can see a list of the controller
+        types in the <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/hh405050(v=vs.85).aspx" target="_blank">subtypes documentation page</a>.&nbsp; I&#39;ve added the enumeration
+        <code>ControllerSubtypes</code> to the <code>XInputConstants.cs</code> file  which contains the possible values for this field. Other capabilities of the controller are
+        indicated in the <code>Flags</code> member. This includes whether or not the controller is wireless, supports voice, has navigation buttons (start, back, dpad), supports
+        force feedback, and whether it has a plugin module like the chat pad.&nbsp; The possible values can be viewed in the enumeration <code>CapabilityFlags</code> in 
+        <code>XInputConstants.cs</code>.</p> The The next field is a <code>XinputGamepad</code>. For each one of the possible inputs there will be a non-zero value if the 
+    controller supports that input. After the <code>XInputGamepad</code> structure is a <code>XInputVibration</code> structure. Like the <code>XInputGamepad</code> if the left and 
+    right motors are supported there will be a non-zero value in the fields of this structure. 
+
+
+    <pre lang="cs">[StructLayout(LayoutKind.Explicit)]
+public struct  XInputCapabilities
+{
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(0)]
+    byte Type;
+
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(1)]
+    public byte SubType;
+
+    [MarshalAs(UnmanagedType.I2)]
+    [FieldOffset(2)]
+    public short Flags;
+
+        
+    [FieldOffset(4)]
+    public XInputGamepad Gamepad;
+
+    [FieldOffset(16)]
+    public XInputVibration Vibration;
+}</pre>
+
+    <h3>XInputBatteryInformation</h3>
+
+    <p>
+        For controllers that use batteries this structure will indicate what type of battery that the control is using and indicated the battery level. The supported
+        battery types are NiMH, alkaline, unknown, disconnected, and wired (for devices that don't actually use batteries).  For the battery level only 4 values are
+        supported to indicated empty, low, medium, and full. The values for both of these fields are also defined in the enumerations <code>BatteryType</code> and
+        <code>BatteryLevel</code> in the <code>XInputConstants.cs</code> file. 
+    </p>
+
+    <pre lang="cs">[StructLayout(LayoutKind.Explicit)]
+public struct  XInputBatteryInformation
+{
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(0)]
+    public byte BatteryType;
+
+    [MarshalAs(UnmanagedType.I1)]
+    [FieldOffset(1)]
+    public byte BatteryLevel;
+}</pre>
+
+    <h2>XInput Functions</h2>
+
+    <p>There are four functions that I use from the XInput library for interacting with the controller, <code>XInputGetState</code>, <code>XInputSetState</code>,
+        <code>XInputGetCapabilities</code> and <code>XInputGetBatteryInformation</code>. All of these functions take as their parameters the index of the controller
+        that is being manipulated and a reference to the structure into which information will be stored or retrieved. The two functions XInputGetBatteryInformation and
+        <code>XInputGetCapabilities take an additional parameter.</code> For <code>XInputGetBatteryInformation</code> takes a parameter to the device type to be probed. 
+        If a user is using a wireless headset it could have it's own battery level separate from the level of the controller. The enumeration <code>BatteryDeviceType</code>
+        contains values for <code>BATTERY_DEVTYPE_GAMEPAD</code> and <code>BATTERY_DEVTYPE_HEADSET</code> for this purpose.  <code>XInputGetCapabilities</code> only
+        accepts a single value of <code>INPUT_FLAG_GAMEPAD</code> for its additional value. This parameter could accept different values in the future as more capabilities
+        are exposed.
+    </p>
+
+    <pre lang="cs">        [DllImport("xinput1_4.dll")]
+        public static extern int XInputGetState
+        (
+            int dwUserIndex,  // [in] Index of the gamer associated with the device
+            ref XInputState pState        // [out] Receives the current state
+        );
+
+        [DllImport("xinput1_4.dll")]
+        public static extern int XInputSetState
+        (
+            int dwUserIndex,  // [in] Index of the gamer associated with the device
+            ref XInputVibration pVibration    // [in, out] The vibration information to send to the controller
+        );
+
+        [DllImport("xinput1_4.dll")]
+        public static extern int XInputGetCapabilities
+        (
+            int dwUserIndex,   // [in] Index of the gamer associated with the device
+            int dwFlags,       // [in] Input flags that identify the device type
+            ref XInputCapabilities pCapabilities  // [out] Receives the capabilities
+        );
+
+
+        [DllImport("xinput1_4.dll")]
+        public static extern int XInputGetBatteryInformation
+        (
+              int dwUserIndex,        // Index of the gamer associated with the device
+              byte devType,            // Which device on this user index
+            ref XInputBatteryInformation pBatteryInformation // Contains the level and types of batteries
+        );
+</pre>
+
+    <h2>XboxController Class</h2>
+
+    <p>
+
+        Now that I've talked about all of the structures and functions available in XInput the one other class to present is one that I've made to manage
+        the use of these other classes. 
+        I&#39;ve wrapped the calls to the functionality in a class named XboxController class. The constructor for this class is private. There can only
+        be up to 4 Xbox controllers on a system. So I've restricted the access to the constructor to prevent more than 4 instances from being created. To
+        get an instance of a controller the static method <code>XbocController.RetrieveController</code> is available. 
+        
+        </p>
+    <p>
+        It's necessary to poll the controller to continually get updates
+        about it's state. In an XNA or DirectX program this would be part of your game loop and so you don't really need to think about it. If you use the class in an environment without such a loop there are two options for getting updates to the controller. You could either call
+        <code>UpdateState</code> manually or you could call the static method <code>XboxController.StartPolling</code>. The static method will create a new
+        thread that will update the controller's state on some frequency. By default I've set this to  25 times per second. If you want to change it to some other value 
+        assign the number of updates per second that you want to received to the static member <code>UpdateFrequency</code>. When you nolonger wish to receive updates remember 
+        to call the <code>XboxController.StopPolling</code> method to end the thread. In the example code that I've attached to this article I call the <code>StopPolling</code>
+        method when the program is closed.
+    </p>
+    <pre lang="cs">protected override void OnClosing(CancelEventArgs e)
+{
+    XboxController.StopPolling();
+    base.OnClosing(e);
+}</pre>
+
+    <p>
+        There's a single event exposed by the class named <code>StateChanged</code> that 
+        is called if something about the controller's state has changed from the last thethat
+        it was called.The e
+        vent arguments for this event contain the current and previous state of the controller.</p>
+    <p>For making the controller vibrate call the <code>Vibrate</code> method. You could call this method by passing two double values (between 0.0d and 1.0d) to indicate
+        how fast the motor should be. Values higher than 1.0 are clamped down to 1.0. Optionally you can specify the amount of time that the motor should be on. If no 
+        timespan is specific the motor will remain on until there's another call to <code>Vibrate</code> specifying a speed of zero. The polling loop for the Xbox controller
+        class also checks to see if it is time to turn off any motors (if a timespan had been specified.</p>
+    <pre lang="cs">#region Motor Functions
+public void Vibrate(double leftMotor, double rightMotor)
+{
+    Vibrate(leftMotor, rightMotor, TimeSpan.MinValue);
+}
+
+public void Vibrate(double leftMotor, double rightMotor, TimeSpan length)
+{
+    leftMotor = Math.Max(0d, Math.Min(1d, leftMotor));
+    rightMotor = Math.Max(0d, Math.Min(1d, rightMotor));
+
+    XInputVibration vibration = new XInputVibration() { LeftMotorSpeed = (ushort)(65535d * leftMotor), RightMotorSpeed = (ushort)(65535d * rightMotor) };
+    Vibrate(vibration, length);
+}
+        
+
+public void Vibrate(XInputVibration strength)
+{
+    _stopMotorTimerActive = false;
+    XInput.XInputSetState(_playerIndex, ref strength);
+}
+
+public void Vibrate(XInputVibration strength, TimeSpan length)
+{
+    XInput.XInputSetState(_playerIndex, ref strength);
+    if (length != TimeSpan.MinValue)
+    {
+        _stopMotorTime = DateTime.Now.Add(length);
+        _stopMotorTimerActive = true;
+    }
+}
+#endregion</pre>
+
+    <p>Most importantly the <code>XBoxController</code> has a property  input so that you can read its state. For the digital inputs reading one of the methods
+        indirectly results in a call to <code>IsButtonPressed</code>.
+    </p>
+
+    <pre lang="cs">#region Digital Button States
+public bool IsDPadUpPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_DPAD_UP); }
+}
+
+public bool IsDPadDownPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_DPAD_DOWN); }
+}
+
+public bool IsDPadLeftPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_DPAD_LEFT); }
+}
+
+public bool IsDPadRightPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_DPAD_RIGHT); }
+}
+
+public bool IsAPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_A); }
+}
+
+public bool IsBPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_B); }
+}
+
+public bool IsXPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_X); }
+}
+
+public bool IsYPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_Y); }
+}
+
+
+public bool IsBackPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_BACK); }
+}
+
+
+public bool IsStartPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_START); }
+}
+
+
+public bool IsLeftShoulderPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_LEFT_SHOULDER); }
+}
+
+
+public bool IsRightShoulderPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_RIGHT_SHOULDER); }
+}
+
+public bool IsLeftStickPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_LEFT_THUMB); }
+}
+
+public bool IsRightStickPressed
+{
+    get { return gamepadStateCurrent.Gamepad.IsButtonPressed((int)ButtonFlags.XINPUT_GAMEPAD_RIGHT_THUMB); }
+}
+#endregion</pre>
+
+    <p>For the analog inputs a numeric value is returned for the left or right triggers, or a pair of numeric values (for X and Y directions) are returned for the thumbsticks.</p>
+
+    <pre lang="cs">#region Analogue Input States
+public int LeftTrigger
+{
+    get { return (int)gamepadStateCurrent.Gamepad.bLeftTrigger;  }
+}
+
+public int RightTrigger
+{
+    get  {  return (int)gamepadStateCurrent.Gamepad.bRightTrigger; }
+}
+
+public Point LeftThumbStick
+{
+    get
+    {
+        Point p = new Point()
+        {
+            X = gamepadStateCurrent.Gamepad.sThumbLX,
+            Y = gamepadStateCurrent.Gamepad.sThumbLY
+        };
+        return p;
+    }
+}
+
+public Point RightThumbStick
+{
+    get
+    {
+        Point p = new Point()
+        {
+            X = gamepadStateCurrent.Gamepad.sThumbRX,
+            Y = gamepadStateCurrent.Gamepad.sThumbRY
+        };
+        return p;
+    }
+}
+
+#endregion</pre>
+    </body>
+</html>
