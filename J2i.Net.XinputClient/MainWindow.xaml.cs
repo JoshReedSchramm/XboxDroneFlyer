@@ -34,6 +34,19 @@ namespace J2i.Net.XinputClient
         private static NavigationPacket _navigationPacket;
         private static PacketRecorder _packetRecorderWorker;
         private static DroneClient _droneClient;
+        
+        private System.Timers.Timer _timer;
+
+
+        private float _yaw = 0f;
+        private float _gaz = 0f;
+        private float _roll = 0f;
+        private float _pitch = 0f;
+
+        private bool _isTakingOff = false;
+        private bool _isLanding = false;
+        private bool _isEmergency = false;
+        private bool _isFlying = false;
 
         public MainWindow()
         {
@@ -51,7 +64,16 @@ namespace J2i.Net.XinputClient
 
             _droneClient.FlatTrim();
 
+            _timer = new System.Timers.Timer(50);
+            _timer.Elapsed += _timer_Elapsed;
+            _timer.Start();
+
             XboxController.StartPolling();
+        }
+
+        void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            DoMovement();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -103,93 +125,94 @@ namespace J2i.Net.XinputClient
 
         private void ProcessDroneCommands()
         {
-            //if (_navigationData == null)
-            //    return;
-
             if (SelectedController.IsAPressed) 
             {
-                if (_navigationData.State.HasFlag(NavigationState.Landed) && _navigationData.State.HasFlag(NavigationState.Command) && !_navigationData.State.HasFlag(NavigationState.Watchdog))
-                {
-                    _droneClient.Takeoff();
-                    _droneClient.Hover();
-                    Console.WriteLine("Taking Off");
+                if (!_isFlying) {
+                    _isTakingOff = true; 
                 }
                 else
                 {
-                    _droneClient.Land();
-                    Console.WriteLine("Landing");
+                    _isLanding = true;
+
                 }
+                return;
             }
 
             if (SelectedController.IsBackPressed)
             {
-                if (_navigationData.State.HasFlag(NavigationState.Flying)) 
-                {
-                    _droneClient.Emergency();
-                    Console.WriteLine("Emergency!");
-                }
+                _isEmergency = true;
+                return;
             }
-
-            bool leftStickMoved = HandleLeftStickMovement();
-            bool rightStickMoved = HandleRightStickMovement();
-
-            if (!leftStickMoved && !rightStickMoved)
-            {
-                Console.WriteLine("Drone is Hovering");
-                _droneClient.Hover();
-            }
-
-            if (SelectedController.IsBackPressed)
-            {
-                if (_navigationData.State.HasFlag(NavigationState.Flying))
-                {
-                    _droneClient.Emergency();
-                }
-            }
+            
+            HandleStickMovement();
         }
 
-        private bool HandleRightStickMovement()
+        private void HandleStickMovement()
         {
-            float yaw = (float)SelectedController.RightThumbStick.X / MAX_VALUE;
-            float gaz = (float)SelectedController.RightThumbStick.Y / MAX_VALUE;
-             
-            if ((Math.Abs(yaw) < .1) && (Math.Abs(gaz) < .1))
-            {
-                Console.WriteLine("Left is Dead");
-                return false;
-            }
-            else
-            {
-                Console.WriteLine("Yaw: {0} = {1}, Gaz: {1} = {2}", SelectedController.RightThumbStick.Y, yaw, SelectedController.RightThumbStick.Y, gaz);
-                _droneClient.Progress(FlightMode.AbsoluteControl, yaw: yaw);
-                _droneClient.Progress(FlightMode.AbsoluteControl, gaz: gaz);
-                
-                return true;
-            }
-            return true;
+            float ScaleFactor = 0.5f;
+            _yaw = (float)SelectedController.RightThumbStick.X / MAX_VALUE * ScaleFactor;
+            _gaz = (float)SelectedController.RightThumbStick.Y / MAX_VALUE * ScaleFactor;
+            _roll = (float)SelectedController.LeftThumbStick.X / MAX_VALUE * ScaleFactor;
+            _pitch = (float)SelectedController.LeftThumbStick.Y / MAX_VALUE * ScaleFactor;
         }
 
-        private bool HandleLeftStickMovement()
+        private void DoMovement()
         {
-            float roll = (float)SelectedController.LeftThumbStick.X / MAX_VALUE;
-            float pitch = (float)SelectedController.LeftThumbStick.Y / MAX_VALUE;
-                
-            if ((Math.Abs(roll) < .1) && (Math.Abs(pitch) < .1))
+            if (_isTakingOff)
             {
-                Console.WriteLine("Right is Dead");
-                return false;
+                Console.WriteLine("Taking Off");
+                _droneClient.Takeoff();
+                _isFlying = true;
+                Reset();
+                return;
             }
-            else
+
+            if (_isLanding)
             {
-                Console.WriteLine("Roll: {0} = {1}, Pitch: {2} = {3}", SelectedController.LeftThumbStick.X, roll, SelectedController.LeftThumbStick.Y, pitch);
-                _droneClient.Progress(FlightMode.AbsoluteControl, roll: roll);
-                _droneClient.Progress(FlightMode.AbsoluteControl, pitch: pitch);
-                
-                return true;
+                Console.WriteLine("Landing");
+                _droneClient.Land();
+                _isFlying = false;
+                Reset();
+                return;
             }
+
+            if (_isEmergency)
+            {
+                Console.WriteLine("Emergency");
+                _droneClient.Emergency();
+                _isFlying = false;
+                Reset();
+                return;
+            }
+
+            if (Math.Abs(_yaw) < .1) 
+            {
+                _yaw = 0;
+            }
+
+            if (Math.Abs(_gaz) < .1) {
+                _gaz = 0;
+            }
+
+            if (Math.Abs(_roll) < .1) {
+                _roll = 0;
+            }
+
+            if (Math.Abs(_pitch) < .1)
+            {
+                _pitch = 0;
+            }
+
+            Console.WriteLine("yaw: {0}, gaz: {1}, roll: {2}, pitch: {3}", _yaw, _gaz, _roll, _pitch);
+            _droneClient.Progress(FlightMode.Progressive, yaw: _yaw, roll: _roll, pitch: _pitch, gaz: _gaz);
         }
 
-
+        private void Reset()
+        {
+            _isTakingOff = false;
+            _isLanding = false;
+            _isEmergency = false;
+        }
 
         private void SendVibration_Click(object sender, RoutedEventArgs e)
         {
@@ -201,13 +224,12 @@ namespace J2i.Net.XinputClient
         private void ProcessNavigationData(NavigationData data)
         {
             _navigationData = data;
-
         }
 
         // This happens when the drone sends a packet of data.
         private void OnNavigationPacketAcquired(NavigationPacket packet)
         {
-            if (_packetRecorderWorker != null && _packetRecorderWorker.IsAlive)
+           if (_packetRecorderWorker != null && _packetRecorderWorker.IsAlive)
                 _packetRecorderWorker.EnqueuePacket(packet);
 
             _navigationPacket = packet;
